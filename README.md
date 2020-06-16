@@ -3,6 +3,8 @@ Forensic Document Classification
 
 The project is in partial fullfilment of MIT 807.  The aim of the project is to build a classifier that is based on the requirements of a forensic investigation company.  The document classifier needs to classify huge amounts of documents into topics in aid of investigations.
 
+[See docs](docs/README.md)
+
 Project Organization
 ------------
 
@@ -15,7 +17,7 @@ Project Organization
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
     │
-    ├── [docs](docs/README.md)               <- A default Sphinx project; see sphinx-doc.org for details
+    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
