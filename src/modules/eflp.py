@@ -34,6 +34,35 @@ print("Initialisation of eflp complete.")
 
 
 
+##### Some definitions ######
+FORMATTING_REGEX = r"=\n|=\d+"
+
+EMAIL_REGEX = r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"""
+URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
+
+
+HTML_REGEX = r"<.*?>"
+CHARACTERS_REGEX = r"[,_]"
+BELONG_REGEX = r"'s"
+ENRON_EMAIL_REGEX = r"/\w+/\w+/\w+@\w+|/\w+/\w+@\w+|/\w+@\w+|/\w+/Enron Communications@Enron Communication|/HOU/\w+|/NA/\w+|@ENRON"
+TWO_LETTERS_REGEX = r"\b[\w]{1,2}\b"
+
+# Standard
+FORMATTING = re.compile(FORMATTING_REGEX,flags=re.IGNORECASE)
+URL= re.compile(URL_REGEX,flags = re.IGNORECASE)
+EMAIL = re.compile(EMAIL_REGEX,flags = re.IGNORECASE)
+HTML = re.compile(HTML_REGEX,flags = re.IGNORECASE)
+CHARACTERS = re.compile(CHARACTERS_REGEX,flags = re.IGNORECASE)
+
+
+#Additional
+EMAIL_ENRON = re.compile(ENRON_EMAIL_REGEX,flags  = re.IGNORECASE)
+TWO_LETTERS = re.compile(TWO_LETTERS_REGEX,flags = re.IGNORECASE)
+
+
+NAME_REGEX = "[P,p]hillip|[A,a]llen"
+NAME = re.compile(NAME_REGEX, flags = re.IGNORECASE)
+
 
 
 
@@ -69,7 +98,13 @@ class Email_Forensic_Processor:
         self.__init__()
         self.src_file = filename
         with open (filename, "r") as inputFile:
-            self.raw_mail = inputFile.read()
+            try:
+                self.raw_mail = inputFile.read()
+            except:
+                print("-----------------------------")
+                print("filename: ",filename," posed a problem during loading.")
+                print("-----------------------------")
+
         parsed_mail = email.parser.Parser().parsestr(self.raw_mail)
 
         self.body = parsed_mail.get_payload()
@@ -113,38 +148,67 @@ class Email_Forensic_Processor:
                 pass
 
     # Perform pre-processing on the email body and store it.
-    def preProcess(self):    
-        self.pre_processed_body = strip_multiple_whitespaces(self.body)
+    def preProcess(self, type="full"):
+        self.pre_processed_body = self.body
+        # Standard essential preprocessing that must take place 
+        self.remove_justify()
+        self.remove_forward()
+        self.remove_patterns(pattern_list = [EMAIL,
+                                             NAME,
+                                             URL,
+                                             HTML,
+                                             CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
         self.replaceContractions()
-        self.remove_patterns()
+        self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
+        
+        if type == "full":  # If full preprocess is to take place
+            self.remove_patterns(pattern_list = [EMAIL_ENRON])
+            self.finalise_preprocess()
+            
+    def finalise_preprocess(self):
+        # This is a helper function used when only a partial preprocess was run with manual steps added in the middel.
         self.tokenize()
         self.lemmatize()
         self.remove_stopwords()
         self.detectEntities()
+
+    def remove_justify(self):
+        new_text = ""
+        lines = re.findall(r".+\n", self.pre_processed_body, flags=0)
+        for line in lines:
+            if len(line) == 79:
+                line = re.sub(r"\n","",line)
+            elif len(line) == 77:
+                line = re.sub(r"=\n","",line)
+            elif len(line) == 75:
+                line = re.sub(r"\n","",line)
+
+            new_text += line
+        self.pre_processed_body = new_text
+
+    def remove_forward(self):
+        if re.search(r"(-+ Forwarded by .+Subject:)",self.pre_processed_body,flags=re.DOTALL) == None:
+            #print(re.search(r"(-+ Forwarded by .+Subject:)",text))
+            pass
+        else:
+            #print("Removing forward")
+            self.pre_processed_body = re.sub(r"(-+ Forwarded by .+Subject:)","",self.pre_processed_body,flags=re.DOTALL)
+            self.pre_processed_body = re.sub(r"^.+\n","",self.pre_processed_body)
         
-    def remove_patterns(self):
-        EMAIL_REGEX = r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"""
-        URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
-        EMAIL_REGEX_2 = r"""/HOU/ECT@ECT"""
-        EMAIL_REGEX_3 = r"""/HOU/ECT"""
-        EMAIL_REGEX_4 = r"""ECT"""
-        EMAIL_REGEX_5 = r"""HOU"""
-        HTML_REGEX = r"""<.*?>"""
-        CHARACTERS_REGEX = r"""[,_]"""
-        BELONG_REGEX = r"""'s"""
-        
-        self.body_email_addr = re.findall(EMAIL_REGEX,self.pre_processed_body)
-        self.body_urls = re.findall(URL_REGEX,self.pre_processed_body)
-        new_string = re.sub(EMAIL_REGEX,'',self.pre_processed_body)
-        new_string = re.sub(EMAIL_REGEX_2,'',new_string)
-        new_string = re.sub(EMAIL_REGEX_3,'',new_string)
-        new_string = re.sub(EMAIL_REGEX_4,'',new_string)
-        new_string = re.sub(EMAIL_REGEX_5,'',new_string)
-        new_string = re.sub(HTML_REGEX,'',new_string)
-        new_string = re.sub(CHARACTERS_REGEX,'',new_string)
-        new_string = re.sub(BELONG_REGEX,'',new_string)
-        self.pre_processed_body = re.sub(URL_REGEX,'',new_string)
-        
+
+
+
+    def remove_patterns(self,pattern_list = None):
+        if pattern_list == None:
+            #pattern_list = [FORMATTING,EMAIL,URL,EMAIL_ENRON,HTML,CHARACTERS,TWO_LETTERS]
+            pass  # If no pattern list is passed, do nothing.
+        for pattern in pattern_list:
+            self.pre_processed_body = pattern.sub('',self.pre_processed_body)      
+
+    def replaceContractions(self):
+        generator = contractions.expand_texts([self.pre_processed_body])
+        for text in generator:
+            self.pre_processed_body = text
 
     def tokenize(self):
         # Split the text string into tokens.
@@ -174,7 +238,7 @@ class Email_Forensic_Processor:
 
     def remove_stopwords(self):
         stop_words = stopwords.words('english')
-        stop_words.extend(['from', 'subject', 're','forward'])
+        #stop_words.extend(['from', 'subject', 're','forward','to','cc','am','pm',"forwarded"])
         filtered_tokens = []
         for word in self.body_tokens:
             if word not in stop_words:
@@ -193,7 +257,7 @@ class Email_Forensic_Processor:
                 self.body_pos_string = self.body_pos_string + ' ' + token.lemma_
                 
         tokenizer = RegexpTokenizer(r'\w+')
-        tokens = tokenizer.tokenize(self.body_pos_string)
+        tokens = tokenizer.tokenize(self.body_pos_string.lower())
 
         # Remove identified tokens
         removal_list = []
@@ -205,10 +269,6 @@ class Email_Forensic_Processor:
             tokens.remove(marked_token)
         self.body_pos_tokens = tokens
 
-    def replaceContractions(self):
-        generator = contractions.expand_texts([self.pre_processed_body])
-        for text in generator:
-            self.pre_processed_body = text
 
             
                 
