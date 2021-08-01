@@ -4,8 +4,8 @@
 
 # Required for the email handling class
 import email    # Standard python email parsing library
-from gensim.summarization import summarize
-from gensim.summarization import keywords
+#from gensim.summarization import summarize
+#from gensim.summarization import keywords
 from gensim.parsing.preprocessing import strip_multiple_whitespaces
 
 # Required imports for additional functions used in pipeline processing
@@ -25,11 +25,11 @@ import json
 print("Loading encore web")
 spacy_nlp = spacy.load('en_core_web_lg')
 #spacy_nlp = spacy.load('en_core_web_sm')
-print('Importing contractions')
-from pycontractions import Contractions
-contractions = Contractions(api_key="glove-twitter-100")
-print("Loading glove")
-contractions.load_models()
+#print('Importing contractions')
+#from pycontractions import Contractions
+#contractions = Contractions(api_key="glove-twitter-100")
+#print("Loading glove")
+#contractions.load_models()
 print("Initialisation of eflp complete.")
 
 
@@ -118,6 +118,10 @@ class Email_Forensic_Processor:
     def saveMail(self,filename):
         #if not (os.path.splitext(filename)[-1] == "json"):
             #filename = filename + ".json"
+        dirname = os.path.dirname(filename)
+        if not (os.path.exists(dirname)):
+            os.makedirs(dirname)
+               
         self.obj_file = filename
         with open (filename, "w") as outputFile:
             json.dump(self.__dict__, outputFile, default = lambda o: o.__dict__)
@@ -158,7 +162,7 @@ class Email_Forensic_Processor:
                                              URL,
                                              HTML,
                                              CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
-        self.replaceContractions()
+#        self.replaceContractions()
         self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
         
         if type == "full":  # If full preprocess is to take place
@@ -205,10 +209,10 @@ class Email_Forensic_Processor:
         for pattern in pattern_list:
             self.pre_processed_body = pattern.sub('',self.pre_processed_body)      
 
-    def replaceContractions(self):
-        generator = contractions.expand_texts([self.pre_processed_body])
-        for text in generator:
-            self.pre_processed_body = text
+#    def replaceContractions(self):
+#        generator = contractions.expand_texts([self.pre_processed_body])
+#        for text in generator:
+#            self.pre_processed_body = text
 
     def tokenize(self):
         # Split the text string into tokens.
