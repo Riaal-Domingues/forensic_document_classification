@@ -151,24 +151,70 @@ class Email_Forensic_Processor:
                 print('Cannot summarise this email.')
                 pass
 
-    # Perform pre-processing on the email body and store it.
+
+            
+            
+            
+# Perform pre-processing on the email body and store it.
+#    def preProcess(self, type="full"):
+#        self.pre_processed_body = self.body
+        # Standard essential preprocessing that must take place 
+#        self.remove_justify()
+#        self.remove_forward()
+#        self.remove_patterns(pattern_list = [EMAIL,
+#                                             NAME,
+#                                             URL,
+#                                             HTML,
+#                                             CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+# commented out: no longer supported       self.replaceContractions()
+#        self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
+        
+#        if type == "full":  # If full preprocess is to take place
+#            self.remove_patterns(pattern_list = [EMAIL_ENRON])
+#            self.finalise_preprocess()
+            
+
+    
+    
+    
+# Perform pre-processing on the email body and store it.
     def preProcess(self, type="full"):
         self.pre_processed_body = self.body
+        
+        if type == "basic":
         # Standard essential preprocessing that must take place 
-        self.remove_justify()
-        self.remove_forward()
-        self.remove_patterns(pattern_list = [EMAIL,
+            self.remove_justify()
+            self.remove_forward()
+#        self.remove_patterns(pattern_list = [EMAIL,
+#                                             NAME,
+#                                             URL,
+#                                             HTML,
+#                                             CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+            self.finalise_preprocess()
+
+        
+        
+#        self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
+        
+        elif type == "full":  # If full preprocess is to take place
+            # Standard essential preprocessing that must take place 
+            self.remove_justify()
+            self.remove_forward()
+            self.remove_patterns(pattern_list = [EMAIL,
+                                             EMAIL_ENRON,
                                              NAME,
                                              URL,
                                              HTML,
                                              CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
-#        self.replaceContractions()
-        self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
-        
-        if type == "full":  # If full preprocess is to take place
-            self.remove_patterns(pattern_list = [EMAIL_ENRON])
+
+
+            #self.remove_patterns(pattern_list = [EMAIL_ENRON])
             self.finalise_preprocess()
-            
+
+
+    
+    
+    
     def finalise_preprocess(self):
         # This is a helper function used when only a partial preprocess was run with manual steps added in the middel.
         self.tokenize()
