@@ -46,6 +46,8 @@ CHARACTERS_REGEX = r"[,_]"
 BELONG_REGEX = r"'s"
 ENRON_EMAIL_REGEX = r"/\w+/\w+/\w+@\w+|/\w+/\w+@\w+|/\w+@\w+|/\w+/Enron Communications@Enron Communication|/HOU/\w+|/NA/\w+|@ENRON"
 TWO_LETTERS_REGEX = r"\b[\w]{1,2}\b"
+NEWLINE_WORD_REGEX = r"[\n](?=\w)"       #Remove formatting for 80 column
+PARAGRAPH_REGEX = r"[\n]"                #To detect paragraph boundaries
 
 # Standard
 FORMATTING = re.compile(FORMATTING_REGEX,flags=re.IGNORECASE)
@@ -55,9 +57,14 @@ HTML = re.compile(HTML_REGEX,flags = re.IGNORECASE)
 CHARACTERS = re.compile(CHARACTERS_REGEX,flags = re.IGNORECASE)
 
 
+
 #Additional
 EMAIL_ENRON = re.compile(ENRON_EMAIL_REGEX,flags  = re.IGNORECASE)
 TWO_LETTERS = re.compile(TWO_LETTERS_REGEX,flags = re.IGNORECASE)
+NEWLINE_WORD = re.compile(NEWLINE_WORD_REGEX, flags = re.IGNORECASE) 
+PARAGRAPH = re.compile(PARAGRAPH_REGEX, flags = re.IGNORECASE)       
+
+
 
 
 NAME_REGEX = "[P,p]hillip|[A,a]llen"
@@ -78,8 +85,8 @@ class Email_Forensic_Processor:
         self.body = None                  # Extracted raw body
         self.subject = None               # Extracted raw subject
         self.pre_processed_body = None    # Basic pre-processed body
-        self.summary = None               # Stored summary of the body
-        self.keywords = None              # Stored keyword from the summary of the body
+#        self.summary = None               # Stored summary of the body
+ #       self.keywords = None              # Stored keyword from the summary of the body
         self.originator= None             # The extracted "From"
         self.recipients = None            # The extracted "To", "cc" and "bcc"
         self.body_people = []             # Detected names in the body of the email
@@ -91,6 +98,9 @@ class Email_Forensic_Processor:
         self.body_urls = None             # List urls detected in the body of the email
         self.body_pos_string = ''         # Extract parts of speech as a long string
         self.body_pos_tokens = None       # The extracted tokens
+        self.body_paragraphs = []         # The extracted paragraphs
+        self.body_paragraphs_tokens = []  # The extracted tokens in each paragraph
+        self.body_pos_paragraph_tokens = [] #The extracted POS tokens in each paragraph
         
 
     # Store the mail object.
@@ -135,21 +145,23 @@ class Email_Forensic_Processor:
         
         
     # Call the Gensim summariser in standard form to generate and store a summary.
-    def createSummary(self,input = "raw"):
-        if input == "raw":
-            try:
-                self.summary = summarize(self.body,split=True)
-                self.keywords = keywords(self.body)
-            except:
-                print('Cannot summarise this email.')
-                pass
-        elif input == "pre-processed":
-            try:
-                self.summary = summarize(self.pre_processed_body,split=True,word_count = 200)
-                self.keywords = keywords(self.pre_processed_body)
-            except:
-                print('Cannot summarise this email.')
-                pass
+    # This is no longer included in Gensim as the summariser third party code is not maintained. 
+    # This is dropped from the code for now.
+    #def createSummary(self,input = "raw"):
+    #    if input == "raw":
+    #        try:
+    #            self.summary = summarize(self.body,split=True)
+    #            self.keywords = keywords(self.body)
+    #        except:
+    #            print('Cannot summarise this email.')
+    #            pass
+    #    elif input == "pre-processed":
+    #        try:
+    #            self.summary = summarize(self.pre_processed_body,split=True,word_count = 200)
+    #            self.keywords = keywords(self.pre_processed_body)
+    #        except:
+    #            print('Cannot summarise this email.')
+    #            pass
 
 
             
@@ -179,17 +191,18 @@ class Email_Forensic_Processor:
     
 # Perform pre-processing on the email body and store it.
     def preProcess(self, type="full"):
+
         self.pre_processed_body = self.body
+        # Extract the paragraphs
+        #self.body_paragraphs = re.split(PARAGRAPH,self.pre_processed_body)
+        #self.body_paragraphs = list(filter(''.__ne__,self.body_paragraphs))
+
         
         if type == "basic":
         # Standard essential preprocessing that must take place 
             self.remove_justify()
             self.remove_forward()
-#        self.remove_patterns(pattern_list = [EMAIL,
-#                                             NAME,
-#                                             URL,
-#                                             HTML,
-#                                             CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+            self.detectEntities()
             self.finalise_preprocess()
 
         
@@ -205,10 +218,16 @@ class Email_Forensic_Processor:
                                              NAME,
                                              URL,
                                              HTML,
-                                             CHARACTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+                                             CHARACTERS,
+                                             TWO_LETTERS,
+                                             NEWLINE_WORD]) # Remove specific patterns, e.g. additioal \n, =09 etc.
 
-
-            #self.remove_patterns(pattern_list = [EMAIL_ENRON])
+            self.body_paragraphs = re.split(PARAGRAPH,self.pre_processed_body)
+            self.body_paragraphs = list(filter(''.__ne__,self.body_paragraphs))
+            
+            self.detectEntities()
+       
+            # Finalise the preprocessing with tokenisation, lemmatisation, and removing stopwords. 
             self.finalise_preprocess()
 
 
@@ -220,7 +239,6 @@ class Email_Forensic_Processor:
         self.tokenize()
         self.lemmatize()
         self.remove_stopwords()
-        self.detectEntities()
 
     def remove_justify(self):
         new_text = ""
@@ -278,6 +296,22 @@ class Email_Forensic_Processor:
         for marked_token in removal_list:
             tokens.remove(marked_token)
         self.body_tokens = tokens
+        
+        # Repeat the tokenization for the extracted paragraphs
+        for text in self.body_paragraphs:
+            text = text.lower()
+            tokens = tokenizer.tokenize(text)
+            
+            # Remove identified tokens
+            removal_list = []
+            for token in tokens:
+                if token.isnumeric():
+                    removal_list.append(token)
+            for marked_token in removal_list:
+                tokens.remove(marked_token)
+            self.body_paragraphs_tokens.append(tokens)
+            
+            
 
     def lemmatize(self):
         lemmatizer = WordNetLemmatizer()
@@ -285,27 +319,50 @@ class Email_Forensic_Processor:
         for token in self.body_tokens:
             lem_tokens.append(lemmatizer.lemmatize(token))
         self.body_tokens = lem_tokens
+        # Repeat for the paragraphs
+        lemmatized_paragraphs = []
+        for paragraph_tokens in self.body_paragraphs_tokens:
+            lem_tokens = []
+            for token in paragraph_tokens:
+                lem_tokens.append(lemmatizer.lemmatize(token))
+            lemmatized_paragraphs.append(lem_tokens)
+        self.body_paragraphs_tokens = lemmatized_paragraphs
 
     def remove_stopwords(self):
         stop_words = stopwords.words('english')
-        #stop_words.extend(['from', 'subject', 're','forward','to','cc','am','pm',"forwarded"])
+
         filtered_tokens = []
         for word in self.body_tokens:
             if word not in stop_words:
                 filtered_tokens.append(word)
         self.body_tokens = filtered_tokens
+        # Repeat for extracted paragraphs
+        filtered_paragraphs_tokens = []
+        for paragraph_tokens in self.body_paragraphs_tokens:
+            filtered_tokens = []
+            for word in paragraph_tokens:
+                if word not in stop_words:
+                    filtered_tokens.append(word)
+            filtered_paragraphs_tokens.append(filtered_tokens)
+        self.body_paragraphs_tokens = filtered_paragraphs_tokens
+
+
 
     def detectEntities(self):
         doc=spacy_nlp(self.pre_processed_body)
+        
+        #Store entities in separate variables for potential later reference
         for entity in doc.ents:
             if entity.label_ == 'PERSON':
                 self.body_people.append(entity.text)
             if entity.label_ == 'ORG':
                 self.body_orgs.append(entity.text)
+        
         for token in doc:
             if token.pos_ == "VERB" or token.pos_ == "NOUN" or token.pos_ == "PROPN":
                 self.body_pos_string = self.body_pos_string + ' ' + token.lemma_
-                
+
+
         tokenizer = RegexpTokenizer(r'\w+')
         tokens = tokenizer.tokenize(self.body_pos_string.lower())
 
@@ -318,14 +375,43 @@ class Email_Forensic_Processor:
         for marked_token in removal_list:
             tokens.remove(marked_token)
         self.body_pos_tokens = tokens
+        
+        # Repeat the process for all paragraphs extracted
+        for paragraph in self.body_paragraphs:
+            doc=spacy_nlp(paragraph)
+            paragraph_pos_string = ''
+            for token in doc:
+                if token.pos_ == "VERB" or token.pos_ == "NOUN" or token.pos_ == "PROPN":
+                    paragraph_pos_string = paragraph_pos_string + ' ' + token.lemma_
+
+            tokens = tokenizer.tokenize(paragraph_pos_string.lower())
+
+            # Remove identified tokens
+            removal_list = []
+            for token in tokens:
+                if token.isnumeric():
+                    removal_list.append(token)
+                    
+            for marked_token in removal_list:
+                tokens.remove(marked_token)
+            self.body_pos_paragraph_tokens.append(tokens)
+
+
 
 
             
                 
 
+
+                
+                
+                
+                
+                
+                
+                
+                
 # Alies for our class for backward compatibility with existing code
-class Summary(Email_Forensic_Processor):
-    pass
 
     
 
