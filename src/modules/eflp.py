@@ -202,9 +202,43 @@ class Email_Forensic_Processor:
         # Standard essential preprocessing that must take place 
             self.remove_justify()
             self.remove_forward()
+            self.remove_patterns(pattern_list = [EMAIL,
+                                             URL,
+                                             HTML]) # Remove specific patterns, e.g. additioal \n, =09 etc.
             self.detectEntities()
             self.finalise_preprocess()
 
+
+            
+        elif type == "mailer":
+        # Preprocessing that is basic and removes mailer ECT
+            self.remove_justify()
+            self.remove_forward()
+            self.remove_patterns(pattern_list = [EMAIL,
+                                             EMAIL_ENRON,
+                                             URL,
+                                             HTML,
+                                             TWO_LETTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+            self.detectEntities()
+            self.finalise_preprocess()
+
+
+        elif type == "name":
+        # Preprocessing that is basic and removes mailer ECT
+            self.remove_justify()
+            self.remove_forward()
+            self.remove_patterns(pattern_list = [EMAIL,
+                                             EMAIL_ENRON,
+                                             NAME,
+                                             URL,
+                                             HTML,
+                                             TWO_LETTERS]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+            self.detectEntities()
+            self.finalise_preprocess()
+
+
+            
+             
         
         
 #        self.remove_patterns(pattern_list = [TWO_LETTERS])  # Remove any remaining one and two letter words not expanded.
@@ -350,6 +384,7 @@ class Email_Forensic_Processor:
 
     def detectEntities(self):
         doc=spacy_nlp(self.pre_processed_body)
+        #doc=spacy_nlp(self.body)
         
         #Store entities in separate variables for potential later reference
         for entity in doc.ents:
