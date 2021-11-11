@@ -198,10 +198,20 @@ class Email_Forensic_Processor:
         #self.body_paragraphs = list(filter(''.__ne__,self.body_paragraphs))
 
         
-        if type == "basic":
+        if type == "very_basic":
         # Standard essential preprocessing that must take place 
+            #self.remove_justify()
+            #self.remove_forward()
+            self.remove_patterns(pattern_list = [URL,
+                                             HTML]) # Remove specific patterns
+            self.detectEntities()
+            self.finalise_preprocess()
+
+
+        if type == "basic":
+        # Standard essential preprocessing that must take place, plus a few extras. 
             self.remove_justify()
-            self.remove_forward()
+            #self.remove_forward()
             self.remove_patterns(pattern_list = [EMAIL,
                                              URL,
                                              HTML]) # Remove specific patterns, e.g. additioal \n, =09 etc.
@@ -265,7 +275,26 @@ class Email_Forensic_Processor:
             self.finalise_preprocess()
 
 
-    
+        elif type == "full_pos":  # If full preprocess is to take place for 
+            # Standard essential preprocessing that must take place 
+            #self.remove_justify()
+            #self.remove_forward()
+            #self.remove_patterns(pattern_list = [EMAIL,
+            #                                 EMAIL_ENRON,
+            #                                 NAME,
+            #                                 URL,
+            #                                 HTML,
+            #                                 CHARACTERS,
+            #                                 TWO_LETTERS,
+            #                                 NEWLINE_WORD]) # Remove specific patterns, e.g. additioal \n, =09 etc.
+
+            #self.body_paragraphs = re.split(PARAGRAPH,self.pre_processed_body)
+            #self.body_paragraphs = list(filter(''.__ne__,self.body_paragraphs))
+            
+            self.detectEntities_no_processing()
+       
+            # Finalise the preprocessing with tokenisation, lemmatisation, and removing stopwords. 
+            self.finalise_preprocess()
     
     
     def finalise_preprocess(self):
@@ -433,6 +462,55 @@ class Email_Forensic_Processor:
 
 
 
+
+    def detectEntities_no_processing(self):
+        doc=spacy_nlp(self.body)
+        #doc=spacy_nlp(self.body)
+        
+        #Store entities in separate variables for potential later reference
+        for entity in doc.ents:
+            if entity.label_ == 'PERSON':
+                self.body_people.append(entity.text)
+            if entity.label_ == 'ORG':
+                self.body_orgs.append(entity.text)
+        
+        for token in doc:
+            if token.pos_ == "VERB" or token.pos_ == "NOUN" or token.pos_ == "PROPN":
+                self.body_pos_string = self.body_pos_string + ' ' + token.lemma_
+
+
+        tokenizer = RegexpTokenizer(r'\w+')
+        tokens = tokenizer.tokenize(self.body_pos_string.lower())
+
+        # Remove identified tokens
+        removal_list = []
+        for token in tokens:
+            if token.isnumeric():
+                removal_list.append(token)
+
+        for marked_token in removal_list:
+            tokens.remove(marked_token)
+        self.body_pos_tokens = tokens
+        
+        # Repeat the process for all paragraphs extracted
+        for paragraph in self.body_paragraphs:
+            doc=spacy_nlp(paragraph)
+            paragraph_pos_string = ''
+            for token in doc:
+                if token.pos_ == "VERB" or token.pos_ == "NOUN" or token.pos_ == "PROPN":
+                    paragraph_pos_string = paragraph_pos_string + ' ' + token.lemma_
+
+            tokens = tokenizer.tokenize(paragraph_pos_string.lower())
+
+            # Remove identified tokens
+            removal_list = []
+            for token in tokens:
+                if token.isnumeric():
+                    removal_list.append(token)
+                    
+            for marked_token in removal_list:
+                tokens.remove(marked_token)
+            self.body_pos_paragraph_tokens.append(tokens)
 
             
                 
